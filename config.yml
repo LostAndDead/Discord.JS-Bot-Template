@@ -1,0 +1,7 @@
+Setup:
+  Token: Token
+  Prefix: '!'
+Settings:
+  StatusType: PLAYING #PLAYING: WATCHING: LISTENING: STREAMING:
+  StatusMessage: Placeholer
+  OwnerID: ID
