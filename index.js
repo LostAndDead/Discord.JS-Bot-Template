@@ -2,6 +2,8 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 const yaml = require('js-yaml');
+const slashSetup = require("./utils/slashSetup")
+const utils = require("./utils/slashUtils")
 
 //Create the bot varible but make it not able to mention everyone to prevent abuse
 const bot = new Discord.Client({ disableEveryone: true });
@@ -16,10 +18,9 @@ catch (e) {
     console.log(e);
 }
 
-//Define command collection
-bot.commands = new Discord.Collection();
+var calls = []
 
-// Command loader
+//Create calls for slash commands
 fs.readdir("./commands/", (err, file) => {
 
     if (err) console.log(err);
@@ -32,10 +33,9 @@ fs.readdir("./commands/", (err, file) => {
 
     jsfile.forEach((f, i) => {
         let props = require(`./commands/${f}`);
-        bot.commands.set(props.help.name, props);
+        let data = props.info
+        calls.push(data)
     });
-    console.clear()
-    console.log("All commands loaded successfully\n");
 });
 
 // Discord.JS Client listeners
@@ -65,28 +65,24 @@ bot.on("ready", async() => {
             type: Config.Settings.StatusType
         }
     });
-});
-
-//Deal with messages
-bot.on("message", async message => {
-    //Ignore bots
-    if (message.author.bot) return;
-    //Split the message
-    let messageArray = message.content.split(" ");
-    //Set the arguments from the command
-    let args = messageArray.slice();
-    //Get the command all in lower case for compatability 
-    let cmd = messageArray[0].toLowerCase();
-    //Seperate the command from the args
-    args = messageArray.slice(1);
-    //If the first character is the prefix its a command
-    if (Config.Setup.Prefix == cmd.slice(0, 1)) {
-        //We get the file it might corospond to
-        let Commandfile = bot.commands.get(cmd.slice(Config.Setup.Prefix.length));
-        //If there is a file for that we run it
-        if (Commandfile) Commandfile.run(bot, message, args);
+    if(Config.Commands.SetupCommands){
+        slashSetup.sendCalls(bot, calls)
     }
 });
+
+bot.ws.on("INTERACTION_CREATE", async interaction => {
+    const command = interaction.data.name.toLowerCase();
+    const args = interaction.data.options;
+
+    //Load all the commands
+    const ping = require("./commands/ping")
+
+    switch(command){
+        case "ping":
+            ping.run(bot, interaction, args)
+            break;
+    }
+})
 
 //LOGIN!
 bot.login(Config.Setup.Token);

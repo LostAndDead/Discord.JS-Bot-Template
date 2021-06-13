@@ -1,8 +1,20 @@
+/*
+ * ====================NOTE====================
+ *    This code was created by LostAndDead,
+ *   please don't claim this as your own work
+ *        https://github.com/LostAndDead
+ * ============================================
+ */
+
 const Discord = require("discord.js");
-module.exports.run = async(bot, message, args) => {
-    message.channel.send("Pong :ping_pong:");
+const utils = require("../utils/slashUtils")
+
+module.exports.run = async(bot, interaction, args) => {
+    
+    await utils.sendUserOnly(bot, interaction, "Pong :ping_pong:")
 };
 
-module.exports.help = {
-    name: "ping"
+module.exports.info = {
+    "name": "ping",
+    "description": "Check if I am alive!"
 };
